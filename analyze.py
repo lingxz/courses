@@ -199,12 +199,14 @@ class StatsContainer:
 
     def get_stats_df(self):
         threshold_key = "Above {}".format(self.threshold)
+        threshold_key_p = "Above {} percentage".format(self.threshold)
         d = {
             'Passes': self.passes,
             'Pass percentage': self.pass_percentage,
             'Modes': self.mode_ranges,
             'Medians': self.median_ranges,
             threshold_key: self.good,
+            threshold_key_p: self.good_percentage,
             'Total students': self.totals,
         }
         self.df = pd.DataFrame(d, index=YEARS).dropna(how="all")

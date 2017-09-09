@@ -110,6 +110,7 @@
     }, function(data) {
         console.log(data);
         var threshold_key = 'Above 70';
+        var threshold_key_p = 'Above 70 percentage';
         var info = $(select.form).find(".show-info");
         var select_stat = `
         <form class="form-group">
@@ -119,6 +120,7 @@
             <option value="Pass percentage">Pass percentage</option>
             <option value="Modes">Modes</option>
             <option value="${threshold_key}">${threshold_key}</option>
+            <option value="${threshold_key_p}">${threshold_key_p}</option>
             <option value="Medians">Medians</option>
             <option value="Total students">Total students</option>
           </select>
