@@ -34,7 +34,7 @@ def createDigitsModel(fontfile, digitheight):
     return model
 
 
-def findDigits(imagefile, fontfile="C:\\Windows\\Fonts\\Calibri.ttf"):
+def findDigits(imagefile, fontfile="Calibri.ttf"):
     # digit recognition part
     im = cv2.imread(imagefile)
     im = im[20:-20, 20:-20]

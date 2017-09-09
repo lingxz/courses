@@ -1,10 +1,11 @@
 import numpy as np
 import io
 import csv
+import os
 import pandas as pd
 from ast import literal_eval
 from constants import SUBJECTS_LONG_TO_SHORT, SUBJECTS_SHORT_TO_LONG, THRESHOLDS, PASS_INDEX, YEARS
-
+import shutil
 
 class Analysis:
 
@@ -30,6 +31,33 @@ class Analysis:
             writer.writerow(self.years)
             writer.writerows(self.histograms)
 
+    def get_images(self):
+        import requests
+        for subject in self.subjects:
+            for year in self.years:
+                s = subject
+                print(s, year)
+                if year >= 2015 and subject == 'astro':
+                    s = 'asp'  # cos they changed the shortform for this year zzz 
+                if year < 2015 and subject == 'proj3':
+                    s = 'BPrj'
+                if year < 2015 and subject == 'proj4':
+                    s = 'MPrj'
+                if year < 2015 and subject == 'plp':
+                    s = 'Plasma'
+                if year < 2015 and subject == 'msm2':
+                    s = 'MSM'
+                if year < 2015 and subject == 'sm':
+                    s = 'StatMech'
+                url = "https://www.imperial.ac.uk/physics/dugs/ExamStats/figures{}/{}.png".format(str(year)[-2:], s)
+                print(url)
+                response = requests.get(url, stream=True)
+                filename = "{}-{}.png".format(s, year)
+                print(response.status_code)
+                if response.status_code == 200:
+                    with open('images/' + filename, 'wb') as f:
+                        shutil.copyfileobj(response.raw, f)
+
     def load_data(self):
         try:
             with open('alldata.csv', 'r') as f:
@@ -46,6 +74,8 @@ class Analysis:
                 data.append(new_row)
             self.histograms = data
         except FileNotFoundError:
+            if not os.listdir('images'):
+                self.get_images()
             self.create_csv()
 
     def display_all(self):

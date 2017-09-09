@@ -25,7 +25,7 @@ pip install -r requirements.dev.txt
 
 `main.py`: runs the server
 
-`digits_classifier.py`: uses opencv to recognize the digits, to run it locally you might need to change the font file path
+`digits_classifier.py`: uses opencv to recognize the digits on the axes
 
 `digitizer.py`: digitizes the graph by using a bunch of hard coded parameters and saves data into `alldata.csv`
 

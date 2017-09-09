@@ -14,20 +14,34 @@ class ExamHistogram:
     def __init__(self, subject, year):
         self.year = year
         self.subject = subject
+        if year >= 2015 and subject == 'astro':
+            self.subject = 'asp'  # cos they changed the shortform for this year zzz 
+        if year < 2015 and subject == 'proj3':
+            self.subject = 'BPrj'
+        if year < 2015 and subject == 'proj4':
+            self.subject = 'MPrj'
+        if year < 2015 and subject == 'plp':
+            self.subject = 'Plasma'
+        if year < 2015 and subject == 'msm2':
+            self.subject = 'MSM'
+        if year < 2015 and subject == 'sm':
+            self.subject = 'StatMech'
         self.graph_top, self.graph_left, self.graph_right, self.graph_bottom = [None, None, None, None]
         self.data = []
-        url = "https://www.imperial.ac.uk/physics/dugs/ExamStats/figures{}/{}.png".format(str(year)[-2:], subject)
-        print(url)
-        self.initialize(url)
+        # url = "https://www.imperial.ac.uk/physics/dugs/ExamStats/figures{}/{}.png".format(str(year)[-2:], self.subject)
+        # print(url)
+        path = "images/{}-{}.png".format(self.subject, year)
+        print(path)
+        self.initialize(path)
 
     def initialize(self, url):
         try:
             self.img_data = img = mpimg.imread(url)
-            # plt.imshow(img)
-            # return
+            print("img loaded")
         except:
             self.data = None
             return
+
         rows, columns, rgba = img.shape
         for index, row in enumerate(img):
             if np.isclose(1., row[rows // 2][0]):
@@ -50,6 +64,13 @@ class ExamHistogram:
                 break
         if not self.graph_left or self.graph_left < 30 or self.graph_left > 70:
             self.graph_left = 40
+        if self.year == 2016 and self.subject in ['cos', 'cpp', 'essay3', 'fqm', 'lasers', 'sp']:
+            # hotfix
+            self.graph_left = 48
+        if self.year == 2013 and self.subject in ['BPrj']:
+            self.graph_left = 48
+        if self.year == 2014 and self.subject in ['astro']:
+            self.graph_left = 48
         if not self.graph_right or self.graph_right <= self.graph_left:
             self.graph_right = img.shape[1] - 22
 
