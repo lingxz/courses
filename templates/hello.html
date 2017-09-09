@@ -1,0 +1,160 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Compare your modules!</title>
+  <meta name="description" content="Compare your modules">
+  <meta name="author" content="Lingyi Hu">
+  <script
+    src="https://code.jquery.com/jquery-3.2.1.min.js"
+    integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.5/angular.min.js"></script>
+  <link
+      href="http://cdn.pydata.org/bokeh/release/bokeh-0.12.6.min.css"
+      rel="stylesheet" type="text/css">
+  <link
+      href="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.6.min.css"
+      rel="stylesheet" type="text/css">
+
+  <script src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.7.min.js"></script>
+  <script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.7.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+  <style>
+    #main {
+      margin: 1em;
+    }
+    .panel {
+      padding: 1em;
+    }
+    .inner {
+      background: #F5F5F5;
+      border-radius: 5px;
+      padding: 1em;
+    }
+    .show-info { 
+      margin-top: 1em;
+      padding-left: 5px;
+      padding-right: 5px;
+      display: none;
+    }
+    .stats th, .stats td {
+      font-size: 0.9em;
+      padding: 0 5px;
+    }
+    .bk-root {
+      margin-top: 1em;
+      margin-right: 10px;
+    }
+
+  </style>
+
+  <!--[if lt IE 9]>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
+  <![endif]-->
+</head>
+
+<body>
+  <div class="row" id="main">
+    <div class="panel col-lg-6 col-md-12">
+      <div class="inner">
+        <form class="form-group" id="form1">
+          <select class="form-control" id="course1" onchange="change_course(this)">
+            <option value="" selected disabled>Choose a module</option>
+            {% for y in courses %}
+              <option value="{{ y }}">{{ y }}</option>
+            {% endfor %}
+          </select>
+          <div class="show-info"></div>
+        </div>
+      </form>
+    </div>
+    <div class="panel col-lg-6 col-md-12">
+      <div class="inner">
+        <form class="form-group">
+          <select class="form-control" id="course2" onchange="change_course(this)">
+            <option value="" selected disabled>Choose a module</option>
+            {% for y in courses %}
+              <option value="{{ y }}">{{ y }}</option>
+            {% endfor %}
+          </select>
+          <div class="show-info"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+<script type="text/javascript">
+  $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+  function change_graph(select) {
+    var stat = $(select).val();
+    var module = $(select).parent().parent().find("select").val()
+    var threshold = 70;
+    $.getJSON($SCRIPT_ROOT + '/api/change_graph', {
+      stat: stat,
+      module: module,
+      threshold: threshold,
+    }, function(data) {
+      $(select).next().html(data.graph_div)
+      $("head").append(data.graph_script)
+    })
+  }
+
+  function change_course(select) {
+    module = $(select).val();
+    $.getJSON($SCRIPT_ROOT + '/api/module_data', {
+      module: module,
+      threshold: 70,
+    }, function(data) {
+        console.log(data);
+        var threshold_key = 'Above 70';
+        var info = $(select.form).find(".show-info");
+        var select_stat = `
+        <form class="form-group">
+          <label for="graph">Select a stat to look at</label>
+          <select class="form-control" id="graph" onchange="change_graph(this)">
+            <option value="Passes">Passes</option>
+            <option value="Pass percentage">Pass percentage</option>
+            <option value="Modes">Modes</option>
+            <option value="${threshold_key}">${threshold_key}</option>
+            <option value="Medians">Medians</option>
+            <option value="Total students">Total students</option>
+          </select>
+        </form>
+        `
+        info.html(data.text + '<br>' + data.df + '<br>' + data.describe_df + '<br><br>' + select_stat + "<div class='bk-wrapper container-fluid'>" + data.graph_div + "</div>")
+        $("head").append(data.graph_script);
+        info.show()
+    })
+  }
+  $.fn.zoomscale = function(x) {
+    if(!$(this).filter(':visible').length && x != 1) return $(this);
+    if(!$(this).parent().hasClass('scaleContainer')){
+      $(this).wrap($('<div class="bk-wrapper">').css('position','relative'));
+      $(this).data({
+          'originalWidth': $(this).width(),
+          'originalHeight': $(this).height()});
+    }
+    $(this).css({
+      'transform': 'scale('+x+')',
+      '-ms-transform': 'scale('+x+')',
+      '-moz-transform': 'scale('+x+')',
+      '-webkit-transform': 'scale('+x+')',
+      'transform-origin': 'right bottom',
+      '-ms-transform-origin': 'right bottom',
+      '-moz-transform-origin': 'right bottom',
+      '-webkit-transform-origin': 'right bottom',
+      'position': 'absolute',
+      'bottom': '0',
+      'right': '0',
+    });
+    if(x == 1)
+      $(this).unwrap().css('position','static'); else
+        $(this).parent()
+          .width($(this).data('originalWidth')*x)
+          .height($(this).data('originalHeight')*x);
+    return $(this);
+  };
+</script>
+</html>
